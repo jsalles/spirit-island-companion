@@ -605,6 +605,16 @@ function OptionsStep({ session, updateSession }: any) {
             </button>
           ))}
         </div>
+        <button
+          onClick={() => dispatch({ type: 'SET_VIEW', view: 'scenarios' })}
+          className="flex items-center gap-1 mt-3 text-xs transition-colors"
+          style={{ color: 'rgba(126,200,160,0.6)', fontFamily: "'Source Serif 4', serif" }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#7EC8A0')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(126,200,160,0.6)')}
+        >
+          <Info size={12} />
+          View full scenario details
+        </button>
       </div>
 
       {/* Blight Card */}

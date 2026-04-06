@@ -5,7 +5,7 @@
  */
 import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
-import { Play, BookOpen, History, Leaf, Sparkles, Users, Shield } from 'lucide-react';
+import { Play, BookOpen, History, Leaf, Sparkles, Users, Shield, Scroll } from 'lucide-react';
 
 const HERO_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/hero-island-fWYdoijtsTn9RUuPE2y8Uc.webp';
 const SPIRIT_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/spirit-gathering-M2SyPMG5HHNeG2rdLexJRT.webp';
@@ -63,7 +63,7 @@ export default function Home() {
 
       {/* Action Cards */}
       <section className="relative z-20 container -mt-12 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           <ActionCard
             icon={<Play className="w-7 h-7" />}
             title="New Game Session"
@@ -97,12 +97,20 @@ export default function Home() {
             delay={0.65}
           />
           <ActionCard
+            icon={<Scroll className="w-7 h-7" />}
+            title="Scenarios"
+            description="Detailed profiles for all 15 scenarios with rule changes and setup modifications."
+            accentColor="#7EC8A0"
+            onClick={() => dispatch({ type: 'SET_VIEW', view: 'scenarios' })}
+            delay={0.8}
+          />
+          <ActionCard
             icon={<History className="w-7 h-7" />}
             title="Session History"
             description="Review past games, win/loss records, and session statistics."
             accentColor="#C5A55A"
             onClick={() => dispatch({ type: 'SET_VIEW', view: 'history' })}
-            delay={0.8}
+            delay={0.95}
           />
         </div>
       </section>

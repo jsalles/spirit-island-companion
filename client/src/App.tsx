@@ -11,6 +11,7 @@ import History from './pages/History';
 import RulesReference from './pages/RulesReference';
 import Spirits from './pages/Spirits';
 import Adversaries from './pages/Adversaries';
+import Scenarios from './pages/Scenarios';
 
 function AppContent() {
   const { state } = useGame();
@@ -25,6 +26,7 @@ function AppContent() {
       {state.view === 'rules' && <RulesReference />}
       {state.view === 'spirits' && <Spirits />}
       {state.view === 'adversaries' && <Adversaries />}
+      {state.view === 'scenarios' && <Scenarios />}
     </>
   );
 }

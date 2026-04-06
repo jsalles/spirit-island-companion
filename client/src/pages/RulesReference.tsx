@@ -159,6 +159,18 @@ export default function RulesReference() {
           >
             Adversaries <ArrowRight className="w-3 h-3" />
           </motion.button>
+          <motion.button
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            onClick={() => dispatch({ type: 'SET_VIEW', view: 'scenarios' })}
+            className="flex items-center gap-1 text-sm transition-colors ml-4"
+            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#7EC8A0')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+          >
+            Scenarios <ArrowRight className="w-3 h-3" />
+          </motion.button>
 
           {/* Title */}
           <motion.div
