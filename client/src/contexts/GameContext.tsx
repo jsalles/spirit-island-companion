@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, useCallback } from 'react
 import { nanoid } from 'nanoid';
 import type { SessionData, PlayerData } from '@/lib/gameData';
 
-type GameView = 'home' | 'setup' | 'session' | 'history' | 'rules';
+type GameView = 'home' | 'setup' | 'session' | 'history' | 'rules' | 'spirits';
 
 interface GameState {
   view: GameView;

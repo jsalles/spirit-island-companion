@@ -134,6 +134,19 @@ export default function RulesReference() {
             Back to Home
           </motion.button>
 
+          <motion.button
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+            onClick={() => dispatch({ type: 'SET_VIEW', view: 'spirits' })}
+            className="flex items-center gap-1 text-sm transition-colors ml-4"
+            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#9B8EC4')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+          >
+            Spirit Gallery <ArrowRight className="w-3 h-3" />
+          </motion.button>
+
           {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

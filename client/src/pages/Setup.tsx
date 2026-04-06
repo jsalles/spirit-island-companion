@@ -10,8 +10,10 @@ import {
   SETUP_STEPS, PLAYER_COLORS, COMPLEXITY_COLORS,
   type Complexity
 } from '@/lib/gameData';
-import { Check, ChevronRight, ChevronLeft, Users, Swords, Map, Scroll, Skull, Leaf, Sparkles } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, Users, Swords, Map, Scroll, Skull, Leaf, Sparkles, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SpiritDetailSheet from '@/components/SpiritDetailSheet';
+import { getSpiritDetail, type SpiritDetail } from '@/lib/spiritDetails';
 
 const STEPS = ['Expansions', 'Players & Spirits', 'Game Options', 'Setup Checklist'];
 
@@ -21,6 +23,16 @@ export default function Setup() {
   const { state, dispatch, updateSession, updatePlayer } = useGame();
   const session = state.currentSession;
   const [activeStep, setActiveStep] = useState(0);
+  const [detailSpirit, setDetailSpirit] = useState<SpiritDetail | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  const openSpiritDetail = (name: string) => {
+    const detail = getSpiritDetail(name);
+    if (detail) {
+      setDetailSpirit(detail);
+      setDetailOpen(true);
+    }
+  };
 
   if (!session) return null;
 
@@ -97,7 +109,7 @@ export default function Setup() {
           )}
           {activeStep === 1 && (
             <StepWrapper key="players">
-              <PlayersStep session={session} updateSession={updateSession} updatePlayer={updatePlayer} />
+              <PlayersStep session={session} updateSession={updateSession} updatePlayer={updatePlayer} onViewSpirit={openSpiritDetail} />
             </StepWrapper>
           )}
           {activeStep === 2 && (
@@ -149,6 +161,13 @@ export default function Setup() {
           )}
         </div>
       </div>
+
+      {/* Spirit Detail Sheet */}
+      <SpiritDetailSheet
+        spirit={detailSpirit}
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+      />
     </div>
   );
 }
@@ -258,7 +277,7 @@ function ExpansionStep({ session, updateSession }: { session: any; updateSession
 }
 
 /* ===== STEP 2: PLAYERS & SPIRITS ===== */
-function PlayersStep({ session, updateSession, updatePlayer }: any) {
+function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit }: any) {
   const availableSpirits = useMemo(() => {
     const activeExpansions = ['base', ...session.expansions];
     return SPIRITS.filter(s => activeExpansions.includes(s.expansion));
@@ -415,8 +434,18 @@ function PlayersStep({ session, updateSession, updatePlayer }: any) {
                                 cursor: taken ? 'not-allowed' : 'pointer',
                               }}
                             >
-                              <div className="font-medium text-white text-xs leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                                {spirit.name}
+                              <div className="flex items-center justify-between">
+                                <div className="font-medium text-white text-xs leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                  {spirit.name}
+                                </div>
+                                <span
+                                  onClick={(e) => { e.stopPropagation(); onViewSpirit(spirit.name); }}
+                                  className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                                  style={{ color: 'rgba(255,255,255,0.3)' }}
+                                  title="View spirit details"
+                                >
+                                  <Info className="w-3.5 h-3.5" />
+                                </span>
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <span

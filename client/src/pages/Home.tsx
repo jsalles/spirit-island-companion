@@ -5,7 +5,7 @@
  */
 import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
-import { Play, BookOpen, History, Leaf, Sparkles } from 'lucide-react';
+import { Play, BookOpen, History, Leaf, Sparkles, Users } from 'lucide-react';
 
 const HERO_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/hero-island-fWYdoijtsTn9RUuPE2y8Uc.webp';
 const SPIRIT_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/spirit-gathering-M2SyPMG5HHNeG2rdLexJRT.webp';
@@ -63,7 +63,7 @@ export default function Home() {
 
       {/* Action Cards */}
       <section className="relative z-20 container -mt-12 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <ActionCard
             icon={<Play className="w-7 h-7" />}
             title="New Game Session"
@@ -81,12 +81,20 @@ export default function Home() {
             delay={0.35}
           />
           <ActionCard
+            icon={<Users className="w-7 h-7" />}
+            title="Spirit Gallery"
+            description="Browse all 37 spirits with detailed profiles, innate powers, and growth options."
+            accentColor="#9B8EC4"
+            onClick={() => dispatch({ type: 'SET_VIEW', view: 'spirits' })}
+            delay={0.5}
+          />
+          <ActionCard
             icon={<History className="w-7 h-7" />}
             title="Session History"
             description="Review past games, spirits played, win/loss records, and session details."
             accentColor="#C5A55A"
             onClick={() => dispatch({ type: 'SET_VIEW', view: 'history' })}
-            delay={0.5}
+            delay={0.65}
           />
         </div>
       </section>
