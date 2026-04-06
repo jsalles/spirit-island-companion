@@ -15,9 +15,7 @@ export default function Home() {
   const { startNewSession, dispatch, state } = useGame();
 
   const openRulesReference = () => {
-    dispatch({ type: 'START_NEW_SESSION', session: {} });
-    // Immediately go to session mode to show rules
-    setTimeout(() => dispatch({ type: 'COMPLETE_SETUP' }), 50);
+    dispatch({ type: 'SET_VIEW', view: 'rules' });
   };
 
   return (

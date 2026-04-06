@@ -7,7 +7,8 @@ import Particles from "./components/Particles";
 import Home from "./pages/Home";
 import Setup from "./pages/Setup";
 import GameSession from "./pages/GameSession";
-import History from "./pages/History";
+import History from './pages/History';
+import RulesReference from './pages/RulesReference';
 
 function AppContent() {
   const { state } = useGame();
@@ -19,6 +20,7 @@ function AppContent() {
       {state.view === 'setup' && <Setup />}
       {state.view === 'session' && <GameSession />}
       {state.view === 'history' && <History />}
+      {state.view === 'rules' && <RulesReference />}
     </>
   );
 }
