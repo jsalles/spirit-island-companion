@@ -10,6 +10,7 @@ import GameSession from "./pages/GameSession";
 import History from './pages/History';
 import RulesReference from './pages/RulesReference';
 import Spirits from './pages/Spirits';
+import Adversaries from './pages/Adversaries';
 
 function AppContent() {
   const { state } = useGame();
@@ -23,6 +24,7 @@ function AppContent() {
       {state.view === 'history' && <History />}
       {state.view === 'rules' && <RulesReference />}
       {state.view === 'spirits' && <Spirits />}
+      {state.view === 'adversaries' && <Adversaries />}
     </>
   );
 }

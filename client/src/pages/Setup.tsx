@@ -480,6 +480,7 @@ function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit }: any
 
 /* ===== STEP 3: GAME OPTIONS ===== */
 function OptionsStep({ session, updateSession }: any) {
+  const { dispatch } = useGame();
   const activeExpansions = ['base', ...session.expansions];
 
   const availableAdversaries = ADVERSARIES.filter(a => activeExpansions.includes(a.expansion));
@@ -560,6 +561,14 @@ function OptionsStep({ session, updateSession }: any) {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => dispatch({ type: 'SET_VIEW', view: 'adversaries' })}
+              className="mt-2 flex items-center gap-1 text-xs transition-colors"
+              style={{ color: '#E06C5A', fontFamily: "'Source Serif 4', serif" }}
+            >
+              <Info className="w-3 h-3" />
+              View full adversary details
+            </button>
           </div>
         )}
       </div>
