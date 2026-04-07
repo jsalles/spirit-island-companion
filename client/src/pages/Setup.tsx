@@ -10,7 +10,12 @@ import {
   SETUP_STEPS, PLAYER_COLORS, COMPLEXITY_COLORS,
   type Complexity
 } from '@/lib/gameData';
-import { Check, ChevronRight, ChevronLeft, Users, Swords, Map, Scroll, Skull, Leaf, Sparkles, Info } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, Users, Swords, Map, Scroll, Skull, Leaf, Sparkles, Info, Shuffle, Dice1, Dice3, Dice5, Wand2 } from 'lucide-react';
+import {
+  randomizeAll, randomizeSpirits, randomizeAdversary, randomizeScenario,
+  randomizeBlightCard, randomizeBoards, getDifficultyInfo,
+  DIFFICULTY_OPTIONS, type DifficultyTarget
+} from '@/lib/randomizer';
 import { Button } from '@/components/ui/button';
 import SpiritDetailSheet from '@/components/SpiritDetailSheet';
 import { getSpiritDetail, type SpiritDetail } from '@/lib/spiritDetails';
@@ -25,6 +30,37 @@ export default function Setup() {
   const [activeStep, setActiveStep] = useState(0);
   const [detailSpirit, setDetailSpirit] = useState<SpiritDetail | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [difficultyTarget, setDifficultyTarget] = useState<DifficultyTarget>('any');
+  const [randomizeAnimation, setRandomizeAnimation] = useState(false);
+
+  const handleRandomizeAll = () => {
+    if (!session) return;
+    setRandomizeAnimation(true);
+    setTimeout(() => {
+      const updates = randomizeAll(session, difficultyTarget);
+      updateSession(updates);
+      setActiveStep(3); // Jump to checklist
+      setRandomizeAnimation(false);
+    }, 600);
+  };
+
+  const handleRandomizeSpirits = () => {
+    if (!session) return;
+    const activeExpansions = ['base', ...session.expansions];
+    const players = randomizeSpirits(session.playerCount, activeExpansions, session.players);
+    updateSession({ players });
+  };
+
+  const handleRandomizeOptions = () => {
+    if (!session) return;
+    const activeExpansions = ['base', ...session.expansions];
+    const { adversary, adversaryLevel } = randomizeAdversary(activeExpansions, difficultyTarget);
+    const scenario = randomizeScenario(activeExpansions);
+    const blightCard = randomizeBlightCard(activeExpansions);
+    const boards = randomizeBoards(session.playerCount, activeExpansions);
+    const hasEventDeck = session.expansions.includes('branch-and-claw') || session.expansions.includes('jagged-earth');
+    updateSession({ adversary, adversaryLevel, scenario, blightCard, boards, useEventDeck: hasEventDeck });
+  };
 
   const openSpiritDetail = (name: string) => {
     const detail = getSpiritDetail(name);
@@ -104,17 +140,36 @@ export default function Setup() {
         <AnimatePresence mode="wait">
           {activeStep === 0 && (
             <StepWrapper key="expansions">
-              <ExpansionStep session={session} updateSession={updateSession} />
+              <ExpansionStep
+                session={session}
+                updateSession={updateSession}
+                difficultyTarget={difficultyTarget}
+                setDifficultyTarget={setDifficultyTarget}
+                onRandomizeAll={handleRandomizeAll}
+                randomizeAnimation={randomizeAnimation}
+              />
             </StepWrapper>
           )}
           {activeStep === 1 && (
             <StepWrapper key="players">
-              <PlayersStep session={session} updateSession={updateSession} updatePlayer={updatePlayer} onViewSpirit={openSpiritDetail} />
+              <PlayersStep
+                session={session}
+                updateSession={updateSession}
+                updatePlayer={updatePlayer}
+                onViewSpirit={openSpiritDetail}
+                onRandomizeSpirits={handleRandomizeSpirits}
+              />
             </StepWrapper>
           )}
           {activeStep === 2 && (
             <StepWrapper key="options">
-              <OptionsStep session={session} updateSession={updateSession} />
+              <OptionsStep
+                session={session}
+                updateSession={updateSession}
+                onRandomizeOptions={handleRandomizeOptions}
+                difficultyTarget={difficultyTarget}
+                setDifficultyTarget={setDifficultyTarget}
+              />
             </StepWrapper>
           )}
           {activeStep === 3 && (
@@ -186,7 +241,14 @@ function StepWrapper({ children }: { children: React.ReactNode }) {
 }
 
 /* ===== STEP 1: EXPANSIONS ===== */
-function ExpansionStep({ session, updateSession }: { session: any; updateSession: any }) {
+function ExpansionStep({ session, updateSession, difficultyTarget, setDifficultyTarget, onRandomizeAll, randomizeAnimation }: {
+  session: any;
+  updateSession: any;
+  difficultyTarget: DifficultyTarget;
+  setDifficultyTarget: (d: DifficultyTarget) => void;
+  onRandomizeAll: () => void;
+  randomizeAnimation: boolean;
+}) {
   const toggle = (id: string) => {
     const exps = session.expansions.includes(id)
       ? session.expansions.filter((e: string) => e !== id)
@@ -200,9 +262,87 @@ function ExpansionStep({ session, updateSession }: { session: any; updateSession
       <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
         Select Your Expansions
       </h2>
-      <p className="mb-8" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Source Serif 4', serif" }}>
+      <p className="mb-4" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Source Serif 4', serif" }}>
         Choose which expansions you'll be using for this session. The base game is always included.
       </p>
+
+      {/* Quick Randomize Panel */}
+      <motion.div
+        className="mb-8 p-5 rounded-xl border overflow-hidden"
+        style={{
+          backgroundColor: 'rgba(22, 46, 28, 0.5)',
+          borderColor: 'rgba(212, 168, 67, 0.25)',
+          background: 'linear-gradient(135deg, rgba(22, 46, 28, 0.6) 0%, rgba(45, 35, 15, 0.3) 100%)',
+        }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <Wand2 className="w-5 h-5" style={{ color: '#D4A843' }} />
+          <h3 className="font-semibold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>Quick Random Setup</h3>
+        </div>
+        <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: "'Source Serif 4', serif" }}>
+          Select your expansions above, choose a difficulty, and let fate decide the rest.
+        </p>
+
+        {/* Difficulty Target */}
+        <div className="mb-4">
+          <label className="text-xs mb-2 block" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}>
+            Target Difficulty
+          </label>
+          <div className="flex gap-2 flex-wrap">
+            {DIFFICULTY_OPTIONS.map(opt => {
+              const info = getDifficultyInfo(opt);
+              const active = difficultyTarget === opt;
+              return (
+                <button
+                  key={opt}
+                  onClick={() => setDifficultyTarget(opt)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    fontFamily: "'Source Serif 4', serif",
+                    backgroundColor: active ? info.color + '25' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${active ? info.color + '60' : 'rgba(255,255,255,0.08)'}`,
+                    color: active ? info.color : 'rgba(255,255,255,0.4)',
+                  }}
+                >
+                  {info.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[11px] mt-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Source Serif 4', serif" }}>
+            {getDifficultyInfo(difficultyTarget).description}
+          </p>
+        </div>
+
+        <motion.button
+          onClick={onRandomizeAll}
+          disabled={randomizeAnimation}
+          className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            backgroundColor: '#D4A843',
+            color: '#0B1D0E',
+            opacity: randomizeAnimation ? 0.7 : 1,
+          }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {randomizeAnimation ? (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 0.6, ease: 'linear' }}
+            >
+              <Shuffle className="w-5 h-5" />
+            </motion.div>
+          ) : (
+            <Shuffle className="w-5 h-5" />
+          )}
+          {randomizeAnimation ? 'Rolling the dice...' : 'Randomize Everything & Go!'}
+        </motion.button>
+      </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {EXPANSIONS.map((exp) => {
@@ -277,7 +417,7 @@ function ExpansionStep({ session, updateSession }: { session: any; updateSession
 }
 
 /* ===== STEP 2: PLAYERS & SPIRITS ===== */
-function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit }: any) {
+function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit, onRandomizeSpirits }: any) {
   const availableSpirits = useMemo(() => {
     const activeExpansions = ['base', ...session.expansions];
     return SPIRITS.filter(s => activeExpansions.includes(s.expansion));
@@ -301,9 +441,26 @@ function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit }: any
       <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
         Players & Spirits
       </h2>
-      <p className="mb-6" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Source Serif 4', serif" }}>
-        Set up each player and choose their spirit.
-      </p>
+      <div className="flex items-center justify-between mb-6">
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Source Serif 4', serif" }}>
+          Set up each player and choose their spirit.
+        </p>
+        <motion.button
+          onClick={onRandomizeSpirits}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all"
+          style={{
+            fontFamily: "'Source Serif 4', serif",
+            backgroundColor: 'rgba(91, 192, 190, 0.1)',
+            border: '1px solid rgba(91, 192, 190, 0.3)',
+            color: '#5BC0BE',
+          }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <Shuffle className="w-3.5 h-3.5" />
+          Random Spirits
+        </motion.button>
+      </div>
 
       {/* Player Count */}
       <div className="mb-8">
@@ -479,7 +636,7 @@ function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit }: any
 }
 
 /* ===== STEP 3: GAME OPTIONS ===== */
-function OptionsStep({ session, updateSession }: any) {
+function OptionsStep({ session, updateSession, onRandomizeOptions, difficultyTarget, setDifficultyTarget }: any) {
   const { dispatch } = useGame();
   const activeExpansions = ['base', ...session.expansions];
 
@@ -508,9 +665,54 @@ function OptionsStep({ session, updateSession }: any) {
         <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
           Game Options
         </h2>
-        <p className="mb-6" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Source Serif 4', serif" }}>
-          Configure adversary, scenario, blight card, and island boards.
-        </p>
+        <div className="flex items-center justify-between mb-2">
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Source Serif 4', serif" }}>
+            Configure adversary, scenario, blight card, and island boards.
+          </p>
+          <motion.button
+            onClick={onRandomizeOptions}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+            style={{
+              fontFamily: "'Source Serif 4', serif",
+              backgroundColor: 'rgba(91, 192, 190, 0.1)',
+              border: '1px solid rgba(91, 192, 190, 0.3)',
+              color: '#5BC0BE',
+            }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <Shuffle className="w-3.5 h-3.5" />
+            Randomize All
+          </motion.button>
+        </div>
+
+        {/* Difficulty Target for Randomization */}
+        <div className="mb-6 p-3 rounded-lg" style={{ backgroundColor: 'rgba(22, 46, 28, 0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <label className="text-xs mb-2 block" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}>
+            Difficulty Target (for randomization)
+          </label>
+          <div className="flex gap-2 flex-wrap">
+            {DIFFICULTY_OPTIONS.map(opt => {
+              const info = getDifficultyInfo(opt);
+              const active = difficultyTarget === opt;
+              return (
+                <button
+                  key={opt}
+                  onClick={() => setDifficultyTarget(opt)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    fontFamily: "'Source Serif 4', serif",
+                    backgroundColor: active ? info.color + '25' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${active ? info.color + '60' : 'rgba(255,255,255,0.08)'}`,
+                    color: active ? info.color : 'rgba(255,255,255,0.4)',
+                  }}
+                >
+                  {info.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Adversary */}
