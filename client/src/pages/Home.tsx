@@ -7,9 +7,9 @@ import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { Play, BookOpen, History, Leaf, Sparkles, Users, Shield, Scroll } from 'lucide-react';
 
-const HERO_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/hero-island-fWYdoijtsTn9RUuPE2y8Uc.webp';
-const SPIRIT_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/spirit-gathering-M2SyPMG5HHNeG2rdLexJRT.webp';
-const FOREST_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/forest-mist-Ar4wXohNL7EqThhHghgPB2.webp';
+const HERO_IMG = '/images/hero-island.webp';
+const SPIRIT_IMG = '/images/spirit-gathering.webp';
+const FOREST_IMG = '/images/forest-mist.webp';
 
 export default function Home() {
   const { startNewSession, dispatch, state } = useGame();

@@ -23,7 +23,7 @@ import {
 } from '@/utils/exportHistory';
 import { toast } from 'sonner';
 
-const VICTORY_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/victory-scene-oGukRmkQsiEXcNJnEsVrrj.webp';
+const VICTORY_IMG = '/images/victory-scene.webp';
 
 const HEADING: React.CSSProperties = { fontFamily: "'Playfair Display', serif" };
 const BODY: React.CSSProperties = { fontFamily: "'Source Serif 4', serif" };

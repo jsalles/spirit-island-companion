@@ -23,7 +23,7 @@ import { getSpiritDetail, type SpiritDetail } from '@/lib/spiritDetails';
 
 const STEPS = ['Expansions', 'Players & Spirits', 'Game Options', 'Setup Checklist'];
 
-const FOREST_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/forest-mist-Ar4wXohNL7EqThhHghgPB2.webp';
+const FOREST_IMG = '/images/forest-mist.webp';
 
 export default function Setup() {
   const { state, dispatch, updateSession, updatePlayer } = useGame();

@@ -9,7 +9,7 @@ import { useGame } from "@/contexts/GameContext";
 import { ADVERSARY_DETAILS, getDifficultyColor, getExpansionColor, type AdversaryDetail } from "@/lib/adversaryDetails";
 import Particles from "@/components/Particles";
 
-const FOREST_MIST_URL = "https://manus-storage.s3.us-east-1.amazonaws.com/e7b94e06-a015-4ac6-b00c-4b11a9cdb7b5/forest-mist.png";
+const FOREST_MIST_URL = "/images/forest-mist.webp";
 
 // Expansion filter options
 const EXPANSIONS = ["All", "Base Game", "Branch & Claw", "Jagged Earth", "Promo Pack 2", "Nature Incarnate"];

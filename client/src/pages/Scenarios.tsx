@@ -18,7 +18,7 @@ import {
 } from "@/lib/scenarioDetails";
 import Particles from "@/components/Particles";
 
-const GAME_PHASE_BG = "https://manus-storage.s3.us-east-1.amazonaws.com/e7b94e06-a015-4ac6-b00c-4b11a9cdb7b5/game-phase-bg.png";
+const GAME_PHASE_BG = "/images/game-phase-bg.webp";
 
 const EXPANSIONS = ["All", "Base Game", "Branch & Claw", "Jagged Earth", "Feather & Flame", "Nature Incarnate"];
 

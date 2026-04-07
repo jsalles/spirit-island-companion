@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const PHASE_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/game-phase-bg-mTWJTV86gUaAVqsnqGNQwU.webp';
+const PHASE_BG = '/images/game-phase-bg.webp';
 
 const PHASE_ICON_MAP: Record<string, typeof Zap> = {
   spirit: Leaf,

@@ -10,7 +10,7 @@ import { SPIRIT_DETAILS, ELEMENT_ICONS, getSpiritDetail, type SpiritDetail, type
 import SpiritDetailSheet from '@/components/SpiritDetailSheet';
 import { Search, ChevronLeft, Filter, X } from 'lucide-react';
 
-const FOREST_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/forest-mist-Ar4wXohNL7EqThhHghgPB2.webp';
+const FOREST_IMG = '/images/forest-mist.webp';
 
 const ALL_ELEMENTS: Element[] = ['Sun', 'Moon', 'Fire', 'Air', 'Water', 'Earth', 'Plant', 'Animal'];
 const ALL_COMPLEXITIES: Complexity[] = ['Low', 'Moderate', 'High', 'Very High'];

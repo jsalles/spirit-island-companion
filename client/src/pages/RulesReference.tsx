@@ -43,7 +43,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'lightbulb': <Lightbulb className="w-5 h-5" />,
 };
 
-const FOREST_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/forest-mist-Ar4wXohNL7EqThhHghgPB2.webp';
+const FOREST_IMG = '/images/forest-mist.webp';
 
 export default function RulesReference() {
   const { dispatch } = useGame();

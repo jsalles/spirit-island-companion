@@ -188,7 +188,7 @@ const plugins = [
       ],
     },
     workbox: {
-      globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+      globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
     },
   }),
 ];
