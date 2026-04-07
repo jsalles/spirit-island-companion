@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#1a3a2a"/>
+      <stop offset="100%" stop-color="#0a1a12"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="40%">
+      <stop offset="0%" stop-color="#2dd4a8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#2dd4a8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="island" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#2a5a3a"/>
+      <stop offset="100%" stop-color="#1a3a28"/>
+    </linearGradient>
+    <linearGradient id="spirit" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#2dd4a8"/>
+      <stop offset="40%" stop-color="#2dd4a8" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#2dd4a8" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="spiritCore" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#80ffe0" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#2dd4a8" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+
+  <!-- Subtle glow -->
+  <circle cx="256" cy="230" r="200" fill="url(#glow)"/>
+
+  <!-- Island base -->
+  <ellipse cx="256" cy="360" rx="140" ry="35" fill="url(#island)" opacity="0.9"/>
+  <ellipse cx="256" cy="355" rx="120" ry="28" fill="#2a5a3a"/>
+
+  <!-- Trees on island -->
+  <g opacity="0.7">
+    <!-- Left tree -->
+    <polygon points="195,355 185,310 175,355" fill="#1a5a30"/>
+    <polygon points="195,330 183,280 171,330" fill="#1a6a35"/>
+    <polygon points="195,305 185,260 175,305" fill="#1a7a3a"/>
+    <!-- Center tree (tallest) -->
+    <polygon points="260,355 248,295 236,355" fill="#1a5a30"/>
+    <polygon points="260,320 246,255 232,320" fill="#1a6a35"/>
+    <polygon points="258,290 247,230 236,290" fill="#1a7a3a"/>
+    <!-- Right tree -->
+    <polygon points="320,355 310,305 300,355" fill="#1a5a30"/>
+    <polygon points="318,325 308,275 298,325" fill="#1a6a35"/>
+    <polygon points="316,300 308,255 300,300" fill="#1a7a3a"/>
+    <!-- Small trees -->
+    <polygon points="225,358 218,325 211,358" fill="#1a5a30"/>
+    <polygon points="290,358 283,320 276,358" fill="#1a5a30"/>
+  </g>
+
+  <!-- Spirit wisps rising from island -->
+  <g fill="none" stroke-linecap="round">
+    <!-- Main spirit column -->
+    <path d="M256,340 C256,300 270,260 255,200 C240,140 265,110 256,80"
+          stroke="url(#spirit)" stroke-width="8" opacity="0.6"/>
+    <path d="M256,340 C256,310 245,270 258,210 C271,150 248,120 256,90"
+          stroke="url(#spiritCore)" stroke-width="3" opacity="0.8"/>
+
+    <!-- Left wisp -->
+    <path d="M230,350 C225,320 215,290 225,240 C235,190 218,165 225,140"
+          stroke="url(#spirit)" stroke-width="5" opacity="0.4"/>
+
+    <!-- Right wisp -->
+    <path d="M280,348 C285,315 290,280 278,235 C266,190 285,168 278,145"
+          stroke="url(#spirit)" stroke-width="5" opacity="0.4"/>
+
+    <!-- Far left wisp -->
+    <path d="M210,355 C200,330 195,310 205,270 C215,230 200,210 208,185"
+          stroke="url(#spirit)" stroke-width="3" opacity="0.25"/>
+
+    <!-- Far right wisp -->
+    <path d="M300,353 C310,325 312,305 302,268 C292,231 308,212 300,190"
+          stroke="url(#spirit)" stroke-width="3" opacity="0.25"/>
+  </g>
+
+  <!-- Spirit eye/orb -->
+  <circle cx="256" cy="155" r="18" fill="#2dd4a8" opacity="0.15"/>
+  <circle cx="256" cy="155" r="10" fill="#2dd4a8" opacity="0.3"/>
+  <circle cx="256" cy="155" r="5" fill="#80ffe0" opacity="0.6"/>
+  <circle cx="256" cy="155" r="2" fill="#ffffff" opacity="0.9"/>
+</svg>
