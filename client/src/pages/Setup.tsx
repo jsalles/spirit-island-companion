@@ -12,10 +12,11 @@ import {
 } from '@/lib/gameData';
 import { Check, ChevronRight, ChevronLeft, Users, Swords, Map, Scroll, Skull, Leaf, Sparkles, Info, Shuffle, Dice1, Dice3, Dice5, Wand2 } from 'lucide-react';
 import {
-  randomizeAll, randomizeSpirits, randomizeAdversary, randomizeScenario,
+  randomizeAll, randomizeSpirits, randomizeBalancedSpirits, randomizeAdversary, randomizeScenario,
   randomizeBlightCard, randomizeBoards, getDifficultyInfo,
-  DIFFICULTY_OPTIONS, type DifficultyTarget
+  DIFFICULTY_OPTIONS, type DifficultyTarget, type BalanceMode
 } from '@/lib/randomizer';
+import TeamAnalysis from '@/components/TeamAnalysis';
 import { Button } from '@/components/ui/button';
 import SpiritDetailSheet from '@/components/SpiritDetailSheet';
 import { getSpiritDetail, type SpiritDetail } from '@/lib/spiritDetails';
@@ -31,24 +32,30 @@ export default function Setup() {
   const [detailSpirit, setDetailSpirit] = useState<SpiritDetail | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [difficultyTarget, setDifficultyTarget] = useState<DifficultyTarget>('any');
+  const [balanceMode, setBalanceMode] = useState<BalanceMode>('balanced');
   const [randomizeAnimation, setRandomizeAnimation] = useState(false);
 
   const handleRandomizeAll = () => {
     if (!session) return;
     setRandomizeAnimation(true);
     setTimeout(() => {
-      const updates = randomizeAll(session, difficultyTarget);
+      const updates = randomizeAll(session, difficultyTarget, balanceMode);
       updateSession(updates);
       setActiveStep(3); // Jump to checklist
       setRandomizeAnimation(false);
     }, 600);
   };
 
-  const handleRandomizeSpirits = () => {
+  const handleRandomizeSpirits = (mode: BalanceMode = 'random') => {
     if (!session) return;
     const activeExpansions = ['base', ...session.expansions];
-    const players = randomizeSpirits(session.playerCount, activeExpansions, session.players);
-    updateSession({ players });
+    if (mode === 'balanced') {
+      const { players } = randomizeBalancedSpirits(session.playerCount, activeExpansions, session.players);
+      updateSession({ players });
+    } else {
+      const players = randomizeSpirits(session.playerCount, activeExpansions, session.players);
+      updateSession({ players });
+    }
   };
 
   const handleRandomizeOptions = () => {
@@ -145,6 +152,8 @@ export default function Setup() {
                 updateSession={updateSession}
                 difficultyTarget={difficultyTarget}
                 setDifficultyTarget={setDifficultyTarget}
+                balanceMode={balanceMode}
+                setBalanceMode={setBalanceMode}
                 onRandomizeAll={handleRandomizeAll}
                 randomizeAnimation={randomizeAnimation}
               />
@@ -241,11 +250,13 @@ function StepWrapper({ children }: { children: React.ReactNode }) {
 }
 
 /* ===== STEP 1: EXPANSIONS ===== */
-function ExpansionStep({ session, updateSession, difficultyTarget, setDifficultyTarget, onRandomizeAll, randomizeAnimation }: {
+function ExpansionStep({ session, updateSession, difficultyTarget, setDifficultyTarget, balanceMode, setBalanceMode, onRandomizeAll, randomizeAnimation }: {
   session: any;
   updateSession: any;
   difficultyTarget: DifficultyTarget;
   setDifficultyTarget: (d: DifficultyTarget) => void;
+  balanceMode: BalanceMode;
+  setBalanceMode: (m: BalanceMode) => void;
   onRandomizeAll: () => void;
   randomizeAnimation: boolean;
 }) {
@@ -283,8 +294,39 @@ function ExpansionStep({ session, updateSession, difficultyTarget, setDifficulty
           <h3 className="font-semibold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>Quick Random Setup</h3>
         </div>
         <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: "'Source Serif 4', serif" }}>
-          Select your expansions above, choose a difficulty, and let fate decide the rest.
+          Select your expansions above, set the number of players, choose a difficulty, and let fate decide the rest.
         </p>
+
+        {/* Player Count */}
+        <div className="mb-4">
+          <label className="text-xs mb-2 block" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}>
+            Number of Players
+          </label>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5, 6].map(n => {
+              const active = session.playerCount === n;
+              return (
+                <button
+                  key={n}
+                  onClick={() => updateSession({ playerCount: n })}
+                  className="w-10 h-10 rounded-lg text-sm font-bold transition-all flex items-center justify-center"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    backgroundColor: active ? 'rgba(91, 192, 190, 0.2)' : 'rgba(255,255,255,0.03)',
+                    border: `2px solid ${active ? '#5BC0BE' : 'rgba(255,255,255,0.08)'}`,
+                    color: active ? '#5BC0BE' : 'rgba(255,255,255,0.4)',
+                    boxShadow: active ? '0 0 12px rgba(91, 192, 190, 0.2)' : 'none',
+                  }}
+                >
+                  {n}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[11px] mt-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Source Serif 4', serif" }}>
+            {session.playerCount === 1 ? 'Solo game — one spirit defending the island' : `${session.playerCount} players — each controlling a unique spirit`}
+          </p>
+        </div>
 
         {/* Difficulty Target */}
         <div className="mb-4">
@@ -317,6 +359,35 @@ function ExpansionStep({ session, updateSession, difficultyTarget, setDifficulty
           </p>
         </div>
 
+        {/* Team Balance Toggle */}
+        <div className="mb-4">
+          <label className="text-xs mb-2 block" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}>
+            Spirit Selection Mode
+          </label>
+          <div className="flex gap-2">
+            {([['random', 'Pure Random', '🎲', 'Completely random spirit picks'], ['balanced', 'Balanced Team', '⚖️', 'Complementary roles & elements']] as const).map(([mode, label, icon, desc]) => {
+              const active = balanceMode === mode;
+              return (
+                <button
+                  key={mode}
+                  onClick={() => setBalanceMode(mode as BalanceMode)}
+                  className="flex-1 p-3 rounded-lg text-left transition-all"
+                  style={{
+                    border: `1px solid ${active ? (mode === 'balanced' ? 'rgba(91, 192, 190, 0.5)' : 'rgba(212, 168, 67, 0.5)') : 'rgba(255,255,255,0.08)'}`,
+                    backgroundColor: active ? (mode === 'balanced' ? 'rgba(91, 192, 190, 0.1)' : 'rgba(212, 168, 67, 0.1)') : 'rgba(255,255,255,0.02)',
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{icon}</span>
+                    <span className="text-xs font-semibold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>{label}</span>
+                  </div>
+                  <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'Source Serif 4', serif" }}>{desc}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <motion.button
           onClick={onRandomizeAll}
           disabled={randomizeAnimation}
@@ -340,7 +411,7 @@ function ExpansionStep({ session, updateSession, difficultyTarget, setDifficulty
           ) : (
             <Shuffle className="w-5 h-5" />
           )}
-          {randomizeAnimation ? 'Rolling the dice...' : 'Randomize Everything & Go!'}
+          {randomizeAnimation ? 'Rolling the dice...' : 'Randomize Everything & Go!'}  
         </motion.button>
       </motion.div>
 
@@ -441,12 +512,27 @@ function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit, onRan
       <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
         Players & Spirits
       </h2>
-      <div className="flex items-center justify-between mb-6">
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Source Serif 4', serif" }}>
-          Set up each player and choose their spirit.
-        </p>
+      <p className="mb-4" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Source Serif 4', serif" }}>
+        Set up each player and choose their spirit.
+      </p>
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
         <motion.button
-          onClick={onRandomizeSpirits}
+          onClick={() => onRandomizeSpirits('random')}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all"
+          style={{
+            fontFamily: "'Source Serif 4', serif",
+            backgroundColor: 'rgba(212, 168, 67, 0.1)',
+            border: '1px solid rgba(212, 168, 67, 0.3)',
+            color: '#D4A843',
+          }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <Shuffle className="w-3.5 h-3.5" />
+          Random
+        </motion.button>
+        <motion.button
+          onClick={() => onRandomizeSpirits('balanced')}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all"
           style={{
             fontFamily: "'Source Serif 4', serif",
@@ -457,9 +543,12 @@ function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit, onRan
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
         >
-          <Shuffle className="w-3.5 h-3.5" />
-          Random Spirits
+          <Sparkles className="w-3.5 h-3.5" />
+          Balanced Team
         </motion.button>
+        <span className="text-[10px] ml-1" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Source Serif 4', serif" }}>
+          Balanced picks complementary roles & elements
+        </span>
       </div>
 
       {/* Player Count */}
@@ -631,6 +720,9 @@ function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit, onRan
           </motion.div>
         ))}
       </div>
+
+      {/* Team Analysis */}
+      <TeamAnalysis spiritNames={session.players.map((p: any) => p.spirit)} />
     </div>
   );
 }
