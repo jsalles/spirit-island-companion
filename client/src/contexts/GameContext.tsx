@@ -25,7 +25,8 @@ type GameAction =
   | { type: 'NEXT_TURN' }
   | { type: 'END_SESSION'; result: 'win' | 'loss'; winCondition?: string; lossReason?: string }
   | { type: 'LOAD_HISTORY' }
-  | { type: 'CLEAR_SESSION' };
+  | { type: 'CLEAR_SESSION' }
+  | { type: 'IMPORT_SESSIONS'; sessions: SessionData[] };
 
 const STORAGE_KEY = 'spirit-island-sessions';
 
@@ -171,6 +172,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         currentPhaseIndex: 0,
         currentTurn: 1,
       };
+
+    case 'IMPORT_SESSIONS': {
+      // Merge imported sessions, avoiding duplicates by date+spirits combo
+      const existingKeys = new Set(
+        state.sessionHistory.map(s => `${s.date}-${s.players.map(p => p.spirit).join(',')}`)
+      );
+      const newSessions = action.sessions.filter(s => {
+        const key = `${s.date}-${s.players.map(p => p.spirit).join(',')}`;
+        return !existingKeys.has(key);
+      });
+      const merged = [...newSessions, ...state.sessionHistory].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      saveHistory(merged);
+      return { ...state, sessionHistory: merged };
+    }
 
     default:
       return state;
