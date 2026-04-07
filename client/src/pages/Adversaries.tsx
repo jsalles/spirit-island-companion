@@ -4,7 +4,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Search, Shield, AlertTriangle, Swords, ChevronDown, ChevronUp, X, Skull, TrendingUp, BookOpen, Layers } from "lucide-react";
+import { ArrowLeft, Search, Shield, AlertTriangle, Swords, ChevronDown, ChevronUp, X, Skull, TrendingUp, BookOpen, Layers, Filter } from "lucide-react";
 import { useGame } from "@/contexts/GameContext";
 import { ADVERSARY_DETAILS, getDifficultyColor, getExpansionColor, type AdversaryDetail } from "@/lib/adversaryDetails";
 import Particles from "@/components/Particles";
@@ -14,12 +14,29 @@ const FOREST_MIST_URL = "https://manus-storage.s3.us-east-1.amazonaws.com/e7b94e
 // Expansion filter options
 const EXPANSIONS = ["All", "Base Game", "Branch & Claw", "Jagged Earth", "Promo Pack 2", "Nature Incarnate"];
 
+const DIFFICULTY_RANGES = [
+  { label: "Low (1-3)", min: 1, max: 3 },
+  { label: "Medium (4-6)", min: 4, max: 6 },
+  { label: "High (7-9)", min: 7, max: 9 },
+  { label: "Extreme (10+)", min: 10, max: 99 },
+];
+
 export default function Adversaries() {
   const { dispatch } = useGame();
   const [search, setSearch] = useState("");
   const [expansionFilter, setExpansionFilter] = useState("All");
+  const [showFilters, setShowFilters] = useState(false);
+  const [difficultyRange, setDifficultyRange] = useState<{ min: number; max: number } | null>(null);
+  const [hasLossCondition, setHasLossCondition] = useState<boolean | null>(null);
   const [expandedAdversary, setExpandedAdversary] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Record<string, number>>({});
+
+  const activeFilterCount = [difficultyRange, hasLossCondition].filter(v => v !== null).length;
+
+  const clearAdvancedFilters = () => {
+    setDifficultyRange(null);
+    setHasLossCondition(null);
+  };
 
   const filtered = useMemo(() => {
     return ADVERSARY_DETAILS.filter((a) => {
@@ -28,9 +45,13 @@ export default function Adversaries() {
         a.flavor.toLowerCase().includes(search.toLowerCase()) ||
         a.escalation.name.toLowerCase().includes(search.toLowerCase());
       const matchExpansion = expansionFilter === "All" || a.expansion === expansionFilter;
-      return matchSearch && matchExpansion;
+      const matchDifficulty = !difficultyRange ||
+        a.levels.some(l => l.difficulty >= difficultyRange.min && l.difficulty <= difficultyRange.max);
+      const matchLossCondition = hasLossCondition === null ||
+        (hasLossCondition ? a.lossCondition !== null : a.lossCondition === null);
+      return matchSearch && matchExpansion && matchDifficulty && matchLossCondition;
     });
-  }, [search, expansionFilter]);
+  }, [search, expansionFilter, difficultyRange, hasLossCondition]);
 
   const toggleExpand = (id: string) => {
     setExpandedAdversary(prev => prev === id ? null : id);
@@ -93,24 +114,126 @@ export default function Adversaries() {
             )}
           </div>
 
-          {/* Expansion Filter Pills */}
-          <div className="flex flex-wrap gap-2">
-            {EXPANSIONS.map((exp) => (
-              <button
-                key={exp}
-                onClick={() => setExpansionFilter(exp)}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
-                style={{
-                  background: expansionFilter === exp ? "rgba(52, 211, 153, 0.2)" : "rgba(16, 42, 28, 0.5)",
-                  border: `1px solid ${expansionFilter === exp ? "rgba(52, 211, 153, 0.4)" : "rgba(52, 211, 153, 0.1)"}`,
-                  color: expansionFilter === exp ? "#6ee7b7" : "rgba(167, 199, 183, 0.6)"
-                }}
+          {/* Filters Toggle */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all shrink-0"
+            style={{
+              background: showFilters ? "rgba(52, 211, 153, 0.15)" : "rgba(16, 42, 28, 0.8)",
+              border: `1px solid ${showFilters ? "rgba(52, 211, 153, 0.3)" : "rgba(52, 211, 153, 0.15)"}`,
+              color: showFilters ? "#6ee7b7" : "rgba(167, 199, 183, 0.6)"
+            }}
+          >
+            <Filter size={16} />
+            Filters
+            {activeFilterCount > 0 && (
+              <span
+                className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold"
+                style={{ backgroundColor: "#34d399", color: "#0a1a0f" }}
               >
-                {exp}
-              </button>
-            ))}
-          </div>
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
         </div>
+
+        {/* Expansion Filter Pills */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {EXPANSIONS.map((exp) => (
+            <button
+              key={exp}
+              onClick={() => setExpansionFilter(exp)}
+              className="px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
+              style={{
+                background: expansionFilter === exp ? "rgba(52, 211, 153, 0.2)" : "rgba(16, 42, 28, 0.5)",
+                border: `1px solid ${expansionFilter === exp ? "rgba(52, 211, 153, 0.4)" : "rgba(52, 211, 153, 0.1)"}`,
+                color: expansionFilter === exp ? "#6ee7b7" : "rgba(167, 199, 183, 0.6)"
+              }}
+            >
+              {exp}
+            </button>
+          ))}
+        </div>
+
+        {/* Collapsible Advanced Filters Panel */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden mb-6"
+            >
+              <div
+                className="p-4 rounded-xl space-y-4"
+                style={{ background: "rgba(16, 42, 28, 0.6)", border: "1px solid rgba(52, 211, 153, 0.1)" }}
+              >
+                {/* Difficulty Range */}
+                <div>
+                  <label className="text-xs mb-2 block text-emerald-500/50 uppercase tracking-wider">Difficulty Range</label>
+                  <div className="flex flex-wrap gap-2">
+                    {DIFFICULTY_RANGES.map((range) => {
+                      const isActive = difficultyRange?.min === range.min && difficultyRange?.max === range.max;
+                      return (
+                        <button
+                          key={range.label}
+                          onClick={() => setDifficultyRange(isActive ? null : range)}
+                          className="text-xs px-3 py-1.5 rounded-lg transition-all"
+                          style={{
+                            background: isActive ? "rgba(52, 211, 153, 0.15)" : "rgba(255,255,255,0.03)",
+                            border: `1px solid ${isActive ? "rgba(52, 211, 153, 0.4)" : "rgba(255,255,255,0.06)"}`,
+                            color: isActive ? "#6ee7b7" : "rgba(167, 199, 183, 0.5)"
+                          }}
+                        >
+                          {range.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Loss Condition Toggle */}
+                <div>
+                  <label className="text-xs mb-2 block text-emerald-500/50 uppercase tracking-wider">Loss Condition</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: "Has Extra Loss Condition", value: true },
+                      { label: "Standard Loss Only", value: false },
+                    ].map(({ label, value }) => {
+                      const isActive = hasLossCondition === value;
+                      return (
+                        <button
+                          key={label}
+                          onClick={() => setHasLossCondition(isActive ? null : value)}
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+                          style={{
+                            background: isActive ? (value ? "rgba(239,68,68,0.12)" : "rgba(52,211,153,0.12)") : "rgba(255,255,255,0.03)",
+                            border: `1px solid ${isActive ? (value ? "rgba(239,68,68,0.3)" : "rgba(52,211,153,0.3)") : "rgba(255,255,255,0.06)"}`,
+                            color: isActive ? (value ? "#f87171" : "#6ee7b7") : "rgba(167, 199, 183, 0.5)"
+                          }}
+                        >
+                          {value && <AlertTriangle size={12} />}
+                          {!value && <Shield size={12} />}
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={clearAdvancedFilters}
+                    className="flex items-center gap-1 text-xs text-emerald-500/50 hover:text-emerald-300 transition-colors"
+                  >
+                    <X size={12} /> Clear advanced filters
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Results Count */}
         <p className="text-emerald-500/50 text-sm mb-4">
@@ -143,7 +266,7 @@ export default function Adversaries() {
             <Shield size={48} className="mx-auto mb-4 text-emerald-700/40" />
             <p className="text-emerald-500/50 text-lg">No adversaries match your search.</p>
             <button
-              onClick={() => { setSearch(""); setExpansionFilter("All"); }}
+              onClick={() => { setSearch(""); setExpansionFilter("All"); clearAdvancedFilters(); }}
               className="mt-3 text-emerald-400 hover:text-emerald-300 text-sm underline underline-offset-4"
             >
               Clear filters

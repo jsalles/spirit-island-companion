@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Search, ChevronDown, ChevronUp, X,
   Scroll, AlertTriangle, Settings, Trophy, Skull,
-  Lightbulb, BookOpen, Tag, Sparkles, Shield
+  Lightbulb, BookOpen, Tag, Sparkles, Shield, Filter
 } from "lucide-react";
 import { useGame } from "@/contexts/GameContext";
 import {
@@ -315,10 +315,24 @@ function ScenarioCard({ scenario }: { scenario: ScenarioDetail }) {
   );
 }
 
+const DIFFICULTY_OPTIONS = ["0", "1", "2", "3", "4"];
+
 export default function Scenarios() {
   const { dispatch } = useGame();
   const [search, setSearch] = useState("");
   const [expansionFilter, setExpansionFilter] = useState("All");
+  const [showFilters, setShowFilters] = useState(false);
+  const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null);
+  const [hasAltVictory, setHasAltVictory] = useState<boolean | null>(null);
+  const [hasAltLoss, setHasAltLoss] = useState<boolean | null>(null);
+
+  const activeFilterCount = [difficultyFilter, hasAltVictory, hasAltLoss].filter(v => v !== null).length;
+
+  const clearAdvancedFilters = () => {
+    setDifficultyFilter(null);
+    setHasAltVictory(null);
+    setHasAltLoss(null);
+  };
 
   const expansionMap: Record<string, string> = {
     "Base Game": "base",
@@ -338,9 +352,14 @@ export default function Scenarios() {
         s.ruleChanges.some(r => r.title.toLowerCase().includes(q) || r.description.toLowerCase().includes(q)) ||
         s.strategyTips.toLowerCase().includes(q);
       const matchExpansion = expansionFilter === "All" || s.expansion === expansionMap[expansionFilter];
-      return matchSearch && matchExpansion;
+      const matchDifficulty = difficultyFilter === null || s.difficulty === difficultyFilter || s.difficulty.startsWith(difficultyFilter);
+      const matchAltVictory = hasAltVictory === null ||
+        (hasAltVictory ? s.victoryChanges !== null : s.victoryChanges === null);
+      const matchAltLoss = hasAltLoss === null ||
+        (hasAltLoss ? s.lossChanges !== null : s.lossChanges === null);
+      return matchSearch && matchExpansion && matchDifficulty && matchAltVictory && matchAltLoss;
     });
-  }, [search, expansionFilter]);
+  }, [search, expansionFilter, difficultyFilter, hasAltVictory, hasAltLoss]);
 
   return (
     <div className="min-h-screen relative" style={{ background: "linear-gradient(180deg, #0a1a0f 0%, #0d2818 30%, #0a1a0f 100%)" }}>
@@ -371,33 +390,55 @@ export default function Scenarios() {
       {/* Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 pb-24">
         {/* Search & Filters */}
-        <div className="mb-8 space-y-4">
-          {/* Search Bar */}
-          <div className="relative">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400/40" />
-            <input
-              type="text"
-              placeholder="Search scenarios..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-10 py-3 rounded-xl text-sm text-emerald-100 placeholder:text-emerald-400/30 outline-none transition-all"
+        <div className="mb-6">
+          {/* Search Bar + Filters Toggle */}
+          <div className="flex flex-col md:flex-row gap-3 mb-4">
+            <div className="relative flex-1">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400/40" />
+              <input
+                type="text"
+                placeholder="Search scenarios..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-11 pr-10 py-3 rounded-xl text-sm text-emerald-100 placeholder:text-emerald-400/30 outline-none transition-all"
+                style={{
+                  background: "rgba(16,40,24,0.7)",
+                  border: "1px solid rgba(74,222,128,0.15)",
+                }}
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-emerald-300"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all shrink-0"
               style={{
-                background: "rgba(16,40,24,0.7)",
-                border: "1px solid rgba(74,222,128,0.15)",
+                background: showFilters ? "rgba(74,222,128,0.15)" : "rgba(16,40,24,0.7)",
+                border: `1px solid ${showFilters ? "rgba(74,222,128,0.3)" : "rgba(74,222,128,0.15)"}`,
+                color: showFilters ? "#4ade80" : "rgba(74,222,128,0.4)"
               }}
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-emerald-300"
-              >
-                <X size={16} />
-              </button>
-            )}
+            >
+              <Filter size={16} />
+              Filters
+              {activeFilterCount > 0 && (
+                <span
+                  className="w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold"
+                  style={{ backgroundColor: "#4ade80", color: "#0a1a0f" }}
+                >
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* Expansion Filter Pills */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mb-4">
             {EXPANSIONS.map((exp) => (
               <button
                 key={exp}
@@ -413,6 +454,100 @@ export default function Scenarios() {
               </button>
             ))}
           </div>
+
+          {/* Collapsible Advanced Filters Panel */}
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden mb-4"
+              >
+                <div
+                  className="p-4 rounded-xl space-y-4"
+                  style={{ background: "rgba(16,40,24,0.6)", border: "1px solid rgba(74,222,128,0.1)" }}
+                >
+                  {/* Difficulty Filter */}
+                  <div>
+                    <label className="text-xs mb-2 block text-emerald-500/50 uppercase tracking-wider">Difficulty</label>
+                    <div className="flex flex-wrap gap-2">
+                      {DIFFICULTY_OPTIONS.map((d) => {
+                        const isActive = difficultyFilter === d;
+                        const color = getDifficultyColor(d);
+                        return (
+                          <button
+                            key={d}
+                            onClick={() => setDifficultyFilter(isActive ? null : d)}
+                            className="text-xs px-3 py-1.5 rounded-lg transition-all"
+                            style={{
+                              background: isActive ? `${color}20` : "rgba(255,255,255,0.03)",
+                              border: `1px solid ${isActive ? `${color}50` : "rgba(255,255,255,0.06)"}`,
+                              color: isActive ? color : "rgba(167,199,183,0.5)"
+                            }}
+                          >
+                            Difficulty {d}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Victory / Loss Condition Toggles */}
+                  <div>
+                    <label className="text-xs mb-2 block text-emerald-500/50 uppercase tracking-wider">Condition Changes</label>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setHasAltVictory(hasAltVictory === true ? null : true)}
+                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+                        style={{
+                          background: hasAltVictory === true ? "rgba(251,191,36,0.12)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${hasAltVictory === true ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.06)"}`,
+                          color: hasAltVictory === true ? "#fbbf24" : "rgba(167,199,183,0.5)"
+                        }}
+                      >
+                        <Trophy size={12} /> Has Alt Victory
+                      </button>
+                      <button
+                        onClick={() => setHasAltLoss(hasAltLoss === true ? null : true)}
+                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+                        style={{
+                          background: hasAltLoss === true ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${hasAltLoss === true ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.06)"}`,
+                          color: hasAltLoss === true ? "#ef4444" : "rgba(167,199,183,0.5)"
+                        }}
+                      >
+                        <Skull size={12} /> Has Alt Loss
+                      </button>
+                      <button
+                        onClick={() => {
+                          setHasAltVictory(hasAltVictory === false ? null : false);
+                        }}
+                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+                        style={{
+                          background: hasAltVictory === false ? "rgba(74,222,128,0.12)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${hasAltVictory === false ? "rgba(74,222,128,0.3)" : "rgba(255,255,255,0.06)"}`,
+                          color: hasAltVictory === false ? "#4ade80" : "rgba(167,199,183,0.5)"
+                        }}
+                      >
+                        <Shield size={12} /> Standard Victory Only
+                      </button>
+                    </div>
+                  </div>
+
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={clearAdvancedFilters}
+                      className="flex items-center gap-1 text-xs text-emerald-500/50 hover:text-emerald-300 transition-colors"
+                    >
+                      <X size={12} /> Clear advanced filters
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Results Count */}
@@ -437,7 +572,7 @@ export default function Scenarios() {
               <Scroll size={48} className="mx-auto mb-4 text-emerald-400/20" />
               <p className="text-emerald-400/40 text-sm">No scenarios match your search.</p>
               <button
-                onClick={() => { setSearch(""); setExpansionFilter("All"); }}
+                onClick={() => { setSearch(""); setExpansionFilter("All"); clearAdvancedFilters(); }}
                 className="mt-3 text-xs text-emerald-400/60 hover:text-emerald-300 underline"
               >
                 Clear filters
