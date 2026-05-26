@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -75,6 +76,7 @@ function App() {
               <FGAppContent onBack={handleBackToLanding} />
             </FinalGirlProvider>
           )}
+          <Analytics />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

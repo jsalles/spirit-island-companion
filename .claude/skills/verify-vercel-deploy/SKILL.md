@@ -37,7 +37,9 @@ Run these in order. Stop and report at the first failure.
   ```
 - `.gitignore` contains `node_modules` and `dist`
 - `package.json` devDependencies includes `vite-plugin-manus-runtime`
+- `package.json` dependencies includes `@vercel/analytics` (Vercel Web Analytics)
 - `vite.config.ts` still has `build.outDir` resolving to `dist/public`
+- `client/src/App.tsx` imports `Analytics` from `@vercel/analytics/react` and renders `<Analytics />` inside the provider tree
 
 If any are missing, Manus regenerated and stripped them. Report which and ask before restoring.
 
@@ -74,7 +76,8 @@ Fresh agents reliably try to "improve" these — don't, unless the user asks:
 
 | Symptom | Why it looks broken | Why it's fine |
 |---|---|---|
-| Vite warns `%VITE_ANALYTICS_ENDPOINT%` undefined | Umami analytics `<script>` ships with literal `%...%` placeholder | Intentional. Set the env var in Vercel only if analytics is wanted; otherwise the script just 404s harmlessly. |
+| Vite warns `%VITE_ANALYTICS_ENDPOINT%` undefined | Umami analytics `<script>` ships with literal `%...%` placeholder | Intentional. Set the env var in Vercel only if analytics is wanted; otherwise the script just 404s harmlessly. This is the legacy Umami script — separate from Vercel Web Analytics below. |
+| `@vercel/analytics` in dependencies + `<Analytics />` in `App.tsx` | Looks like third-party tracking that could be removed | Vercel Web Analytics — page views surface in the Vercel dashboard. Auto-enabled when the dependency is present and the component is mounted. Don't remove. Use `@vercel/analytics/react` (this is a Vite SPA, not Next.js — `/next` import will not work). |
 | `vite-plugin-manus-runtime` in devDependencies | Looks like dev-only tooling | Runs at build time and inlines runtime into `index.html`. Removing it breaks the app in prod. |
 | `vitePluginManusDebugCollector` in `vite.config.ts` | Looks like dev-only debug code that shouldn't ship | Guarded by `NODE_ENV === "production"` check inside `transformIndexHtml`. No prod impact. |
 | `server/index.ts` and `build` script that bundles it | Looks like Vercel should deploy it as a serverless function | It's only for local `pnpm start`. Vercel uses `buildCommand` from `vercel.json` (just `vite build`) and serves `dist/public` as static. Do not add `api/` directory or convert to serverless. |
@@ -86,6 +89,7 @@ Fresh agents reliably try to "improve" these — don't, unless the user asks:
 - `vercel.json` deleted or shape changed → restore
 - `.gitignore` reset to one-line `.DS_Store` → re-add `node_modules` and `dist`
 - `vite-plugin-manus-runtime` removed from `package.json` → re-add to devDependencies
+- `@vercel/analytics` removed from `package.json` or `<Analytics />` stripped from `App.tsx` → re-add (Manus refresh likely overwrote both)
 - Build script no longer outputs to `dist/public` → re-align `vite.config.ts` and `vercel.json`
 
 In all cases, show the diff to the user and ask before committing.
@@ -97,6 +101,8 @@ In all cases, show the diff to the user and ask before committing.
 cat vercel.json                         # check shape
 grep -E "node_modules|dist" .gitignore  # check ignores
 grep vite-plugin-manus-runtime package.json
+grep @vercel/analytics package.json
+grep -n "@vercel/analytics" client/src/App.tsx
 pnpm install
 pnpm vite build
 ls dist/public/                          # expect index.html, assets/, __manus__/
