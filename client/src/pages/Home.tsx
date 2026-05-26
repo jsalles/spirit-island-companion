@@ -5,13 +5,17 @@
  */
 import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
-import { Play, BookOpen, History, Leaf, Sparkles, Users, Shield, Scroll } from 'lucide-react';
+import { Play, BookOpen, History, Leaf, Sparkles, Users, Shield, Scroll, ArrowLeft } from 'lucide-react';
 
 const HERO_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/hero-island-fWYdoijtsTn9RUuPE2y8Uc.webp';
 const SPIRIT_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/spirit-gathering-M2SyPMG5HHNeG2rdLexJRT.webp';
 const FOREST_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/forest-mist-Ar4wXohNL7EqThhHghgPB2.webp';
 
-export default function Home() {
+interface HomeProps {
+  onBack?: () => void;
+}
+
+export default function Home({ onBack }: HomeProps) {
   const { startNewSession, dispatch, state } = useGame();
 
   const openRulesReference = () => {
@@ -20,6 +24,21 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#0b1d0e' }}>
+      {/* Back Button */}
+      {onBack && (
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          onClick={onBack}
+          className="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10"
+          style={{ color: 'rgba(255,255,255,0.7)' }}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back</span>
+        </motion.button>
+      )}
+
       {/* Hero Section */}
       <section className="relative h-[85vh] flex items-end">
         <div className="absolute inset-0">
