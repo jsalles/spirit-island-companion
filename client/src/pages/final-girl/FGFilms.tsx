@@ -4,7 +4,7 @@
  */
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useFinalGirl } from '@/contexts/FinalGirlContext';
+import { useLocation } from 'wouter';
 import {
   FEATURE_FILMS, SERIES_LABELS, DIFFICULTY_COLORS, getFinalGirlsByFilm,
   type FeatureFilm, type Series
@@ -12,7 +12,7 @@ import {
 import { ArrowLeft, X, Skull, MapPin, User, Heart, Zap, Shield } from 'lucide-react';
 
 export default function FGFilms() {
-  const { dispatch } = useFinalGirl();
+  const [, setLocation] = useLocation();
   const [selectedFilm, setSelectedFilm] = useState<FeatureFilm | null>(null);
   const [filterSeries, setFilterSeries] = useState<Series | 'all'>('all');
 
@@ -28,7 +28,7 @@ export default function FGFilms() {
         <div className="container py-4">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => dispatch({ type: 'SET_VIEW', view: 'home' })}
+              onClick={() => setLocation('/')}
               className="flex items-center gap-2 text-sm"
               style={{ color: 'rgba(255,255,255,0.7)' }}
             >

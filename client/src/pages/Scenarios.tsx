@@ -4,12 +4,12 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "wouter";
 import {
   ArrowLeft, Search, ChevronDown, ChevronUp, X,
   Scroll, AlertTriangle, Settings, Trophy, Skull,
   Lightbulb, BookOpen, Tag, Sparkles, Shield, Filter
 } from "lucide-react";
-import { useGame } from "@/contexts/GameContext";
 import {
   SCENARIO_DETAILS,
   getScenarioExpansionColor,
@@ -318,7 +318,7 @@ function ScenarioCard({ scenario }: { scenario: ScenarioDetail }) {
 const DIFFICULTY_OPTIONS = ["0", "1", "2", "3", "4"];
 
 export default function Scenarios() {
-  const { dispatch } = useGame();
+  const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [expansionFilter, setExpansionFilter] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
@@ -374,7 +374,7 @@ export default function Scenarios() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, #0a1a0f 100%)" }} />
         <div className="relative z-10 h-full flex flex-col justify-end px-6 pb-6 max-w-6xl mx-auto">
           <button
-            onClick={() => dispatch({ type: "SET_VIEW", view: "home" })}
+            onClick={() => setLocation('/')}
             className="flex items-center gap-2 text-emerald-400/70 hover:text-emerald-300 transition-colors mb-4 w-fit"
           >
             <ArrowLeft size={16} />

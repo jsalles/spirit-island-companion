@@ -38,8 +38,10 @@ Run these in order. Stop and report at the first failure.
 - `.gitignore` contains `node_modules` and `dist`
 - `package.json` devDependencies includes `vite-plugin-manus-runtime`
 - `package.json` dependencies includes `@vercel/analytics` (Vercel Web Analytics)
+- `package.json` dependencies includes `wouter` (URL-based routing — required for per-page analytics)
 - `vite.config.ts` still has `build.outDir` resolving to `dist/public`
 - `client/src/App.tsx` imports `Analytics` from `@vercel/analytics/react` and renders `<Analytics />` inside the provider tree
+- `client/src/App.tsx` imports `Route`, `Switch`, `Redirect` from `wouter` and mounts the route tree (`/landing`, `/spirit-island/*`, `/final-girl/*`)
 
 If any are missing, Manus regenerated and stripped them. Report which and ask before restoring.
 
@@ -78,6 +80,9 @@ Fresh agents reliably try to "improve" these — don't, unless the user asks:
 |---|---|---|
 | Vite warns `%VITE_ANALYTICS_ENDPOINT%` undefined | Umami analytics `<script>` ships with literal `%...%` placeholder | Intentional. Set the env var in Vercel only if analytics is wanted; otherwise the script just 404s harmlessly. This is the legacy Umami script — separate from Vercel Web Analytics below. |
 | `@vercel/analytics` in dependencies + `<Analytics />` in `App.tsx` | Looks like third-party tracking that could be removed | Vercel Web Analytics — page views surface in the Vercel dashboard. Auto-enabled when the dependency is present and the component is mounted. Don't remove. Use `@vercel/analytics/react` (this is a Vite SPA, not Next.js — `/next` import will not work). |
+| `wouter` `<Route nest>` blocks in `App.tsx` with `GameProvider` / `FinalGirlProvider` inside | Looks like odd nesting; might suggest moving providers up | Intentional. Providers mount only on their respective `/spirit-island/*` and `/final-girl/*` subtrees so each context's localStorage load only runs when that game is active. Don't hoist them to top level. |
+| `useEffect(() => { if (!session) setLocation(...) }, ...)` in Setup/GameSession/FGSetup/FGSession | Looks like defensive guard noise | Required: if a user reloads at `/spirit-island/session` (or `/setup`), the in-memory `currentSession` is gone and the page would crash without redirect. Keep these guards. |
+| Relative `setLocation('/rules')` (not `setLocation('/spirit-island/rules')`) inside pages mounted under a `<Route nest>` | Looks like a missing prefix | Required by wouter's `nest`: `useLocation()` inside a nested route is scoped to the parent base. Using `setLocation('/spirit-island/rules')` from inside `/spirit-island/*` produces `/spirit-island/spirit-island/rules` (404). Use relative paths within the subtree; use `setLocation('~/landing')` (tilde-slash prefix) to escape to root. |
 | `vite-plugin-manus-runtime` in devDependencies | Looks like dev-only tooling | Runs at build time and inlines runtime into `index.html`. Removing it breaks the app in prod. |
 | `vitePluginManusDebugCollector` in `vite.config.ts` | Looks like dev-only debug code that shouldn't ship | Guarded by `NODE_ENV === "production"` check inside `transformIndexHtml`. No prod impact. |
 | `server/index.ts` and `build` script that bundles it | Looks like Vercel should deploy it as a serverless function | It's only for local `pnpm start`. Vercel uses `buildCommand` from `vercel.json` (just `vite build`) and serves `dist/public` as static. Do not add `api/` directory or convert to serverless. |
@@ -90,6 +95,7 @@ Fresh agents reliably try to "improve" these — don't, unless the user asks:
 - `.gitignore` reset to one-line `.DS_Store` → re-add `node_modules` and `dist`
 - `vite-plugin-manus-runtime` removed from `package.json` → re-add to devDependencies
 - `@vercel/analytics` removed from `package.json` or `<Analytics />` stripped from `App.tsx` → re-add (Manus refresh likely overwrote both)
+- Routing collapsed back to state-based (App.tsx no longer imports from `wouter`, pages dispatch `SET_VIEW` again) → re-add the route tree. Per-page analytics breaks if the URL stops changing.
 - Build script no longer outputs to `dist/public` → re-align `vite.config.ts` and `vercel.json`
 
 In all cases, show the diff to the user and ask before committing.
@@ -102,7 +108,9 @@ cat vercel.json                         # check shape
 grep -E "node_modules|dist" .gitignore  # check ignores
 grep vite-plugin-manus-runtime package.json
 grep @vercel/analytics package.json
+grep wouter package.json
 grep -n "@vercel/analytics" client/src/App.tsx
+grep -n "from 'wouter'" client/src/App.tsx
 pnpm install
 pnpm vite build
 ls dist/public/                          # expect index.html, assets/, __manus__/

@@ -3,8 +3,9 @@
  * Horror theme with blood-red accents
  * Includes end-game scoring calculator
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { useFinalGirl } from '@/contexts/FinalGirlContext';
 import { FG_GAME_PHASES } from '@/lib/finalGirlData';
 import { calculateFGScore, getScoreDescription, type FGScoreInput, type FGScoreBreakdown } from '@/utils/fgScoring';
@@ -13,6 +14,7 @@ import { toast } from 'sonner';
 
 export default function FGSession() {
   const { state, dispatch } = useFinalGirl();
+  const [, setLocation] = useLocation();
   const session = state.currentSession;
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean>>({});
@@ -34,6 +36,10 @@ export default function FGSession() {
     darkPowerRevealed: false,
   });
   const [scoreBreakdown, setScoreBreakdown] = useState<FGScoreBreakdown | null>(null);
+
+  useEffect(() => {
+    if (!session) setLocation('/', { replace: true });
+  }, [session, setLocation]);
 
   if (!session) return null;
 
@@ -104,6 +110,7 @@ export default function FGSession() {
       : `The Killer prevails... Score: ${scoreBreakdown.finalScore} pts`
     );
     setShowEndDialog(false);
+    setLocation('/');
   };
 
   const handleSkipScoring = () => {
@@ -111,6 +118,7 @@ export default function FGSession() {
     dispatch({ type: 'END_SESSION', result: gameResult });
     toast.success(gameResult === 'win' ? 'You survived! The Final Girl lives!' : 'The Killer prevails... Game Over.');
     setShowEndDialog(false);
+    setLocation('/');
   };
 
   return (

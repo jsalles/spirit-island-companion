@@ -4,12 +4,12 @@
  */
 import { useState, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { useFinalGirl } from '@/contexts/FinalGirlContext';
+import { useLocation } from 'wouter';
 import { FG_RULES_DATA, FG_RULES_CATEGORIES, searchFGRules, type FGRuleEntry } from '@/lib/finalGirlData';
 import { ArrowLeft, Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function FGRules() {
-  const { dispatch } = useFinalGirl();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedEntries, setExpandedEntries] = useState<Record<string, boolean>>({});
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function FGRules() {
         <div className="container py-4">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => dispatch({ type: 'SET_VIEW', view: 'home' })}
+              onClick={() => setLocation('/')}
               className="flex items-center gap-2 text-sm"
               style={{ color: 'rgba(255,255,255,0.7)' }}
             >

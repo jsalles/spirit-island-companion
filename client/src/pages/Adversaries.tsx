@@ -4,8 +4,8 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "wouter";
 import { ArrowLeft, Search, Shield, AlertTriangle, Swords, ChevronDown, ChevronUp, X, Skull, TrendingUp, BookOpen, Layers, Filter } from "lucide-react";
-import { useGame } from "@/contexts/GameContext";
 import { ADVERSARY_DETAILS, getDifficultyColor, getExpansionColor, type AdversaryDetail } from "@/lib/adversaryDetails";
 import Particles from "@/components/Particles";
 
@@ -22,7 +22,7 @@ const DIFFICULTY_RANGES = [
 ];
 
 export default function Adversaries() {
-  const { dispatch } = useGame();
+  const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [expansionFilter, setExpansionFilter] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
@@ -75,7 +75,7 @@ export default function Adversaries() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, #0a1a0f 100%)" }} />
         <div className="relative z-10 h-full flex flex-col justify-end px-6 pb-6 max-w-6xl mx-auto">
           <button
-            onClick={() => dispatch({ type: "SET_VIEW", view: "home" })}
+            onClick={() => setLocation('/')}
             className="flex items-center gap-2 text-emerald-400/70 hover:text-emerald-300 transition-colors mb-4 w-fit"
           >
             <ArrowLeft size={16} />

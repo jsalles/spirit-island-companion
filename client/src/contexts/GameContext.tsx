@@ -2,10 +2,7 @@ import React, { createContext, useContext, useReducer, useCallback } from 'react
 import { nanoid } from 'nanoid';
 import type { SessionData, PlayerData } from '@/lib/gameData';
 
-type GameView = 'home' | 'setup' | 'session' | 'history' | 'rules' | 'spirits' | 'adversaries' | 'scenarios';
-
 interface GameState {
-  view: GameView;
   currentSession: SessionData | null;
   sessionHistory: SessionData[];
   setupStep: number;
@@ -15,7 +12,6 @@ interface GameState {
 }
 
 type GameAction =
-  | { type: 'SET_VIEW'; view: GameView }
   | { type: 'START_NEW_SESSION'; session: Partial<SessionData> }
   | { type: 'UPDATE_SESSION'; updates: Partial<SessionData> }
   | { type: 'SET_SETUP_STEP'; step: number }
@@ -44,7 +40,6 @@ function saveHistory(sessions: SessionData[]) {
 }
 
 const initialState: GameState = {
-  view: 'home',
   currentSession: null,
   sessionHistory: loadHistory(),
   setupStep: 0,
@@ -55,9 +50,6 @@ const initialState: GameState = {
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
-    case 'SET_VIEW':
-      return { ...state, view: action.view };
-
     case 'START_NEW_SESSION': {
       const session: SessionData = {
         id: nanoid(),
@@ -82,7 +74,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         currentSession: session,
-        view: 'setup',
         setupStep: 0,
         setupChecklist: {},
         currentPhaseIndex: 0,
@@ -125,7 +116,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'COMPLETE_SETUP':
       return {
         ...state,
-        view: 'session',
         currentPhaseIndex: 0,
         currentTurn: 1,
       };
@@ -155,7 +145,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         currentSession: ended,
         sessionHistory: history,
-        view: 'home',
       };
     }
 
@@ -166,7 +155,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         currentSession: null,
-        view: 'home',
         setupStep: 0,
         setupChecklist: {},
         currentPhaseIndex: 0,

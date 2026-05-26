@@ -2,8 +2,9 @@
  * Final Girl Setup — Horror-themed setup wizard
  * Film selection, manual/random game config, setup checklist
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { useFinalGirl } from '@/contexts/FinalGirlContext';
 import {
   FEATURE_FILMS, SERIES_LABELS, FINAL_GIRLS, DIFFICULTY_COLORS,
@@ -17,14 +18,21 @@ const STEPS = ['Feature Films', 'Choose Game', 'Setup Checklist'];
 
 export default function FGSetup() {
   const { state, dispatch, updateSession } = useFinalGirl();
+  const [, setLocation] = useLocation();
   const [step, setStep] = useState(0);
 
   const session = state.currentSession;
+
+  useEffect(() => {
+    if (!session) setLocation('/', { replace: true });
+  }, [session, setLocation]);
+
   if (!session) return null;
 
   const handleBack = () => {
     if (step === 0) {
       dispatch({ type: 'CLEAR_SESSION' });
+      setLocation('/');
     } else {
       setStep(s => s - 1);
     }
@@ -46,6 +54,7 @@ export default function FGSetup() {
 
   const handleCompleteSetup = () => {
     dispatch({ type: 'COMPLETE_SETUP' });
+    setLocation('/session');
   };
 
   return (

@@ -5,6 +5,7 @@
  */
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { useFinalGirl } from '@/contexts/FinalGirlContext';
 import type { FGSessionData } from '@/lib/finalGirlData';
 import { getRank } from '@/utils/fgScoring';
@@ -12,7 +13,8 @@ import { ArrowLeft, Download, Share2, Trophy, XCircle, Calendar, Skull, ChevronD
 import { toast } from 'sonner';
 
 export default function FGHistory() {
-  const { state, dispatch } = useFinalGirl();
+  const { state } = useFinalGirl();
+  const [, setLocation] = useLocation();
   const [showExportMenu, setShowExportMenu] = useState(false);
   const sessions = state.sessionHistory;
 
@@ -87,7 +89,7 @@ export default function FGHistory() {
         <div className="container py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => dispatch({ type: 'SET_VIEW', view: 'home' })}
+              onClick={() => setLocation('/')}
               className="flex items-center gap-2 text-sm"
               style={{ color: 'rgba(255,255,255,0.7)' }}
             >

@@ -5,6 +5,7 @@
  */
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { useGame } from '@/contexts/GameContext';
 import {
   Trophy, Skull, ChevronLeft, Calendar, Users, Clock,
@@ -30,7 +31,13 @@ const BODY: React.CSSProperties = { fontFamily: "'Source Serif 4', serif" };
 
 export default function History() {
   const { state, dispatch, startNewSession } = useGame();
+  const [, setLocation] = useLocation();
   const sessions = state.sessionHistory;
+
+  const handleStartNewSession = () => {
+    startNewSession();
+    setLocation('/setup');
+  };
   const [tab, setTab] = useState<'stats' | 'sessions'>('stats');
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [importBanner, setImportBanner] = useState<SessionData[] | null>(null);
@@ -124,7 +131,7 @@ export default function History() {
         />
         <div className="absolute bottom-0 left-0 right-0 container pb-6">
           <button
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'home' })}
+            onClick={() => setLocation('/')}
             className="text-sm mb-3 flex items-center gap-1 transition-colors"
             style={{ color: 'rgba(255,255,255,0.4)', ...BODY }}
           >
@@ -357,7 +364,7 @@ export default function History() {
               Start a new game to begin tracking your Spirit Island journey.
             </p>
             <button
-              onClick={startNewSession}
+              onClick={handleStartNewSession}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ backgroundColor: '#5BC0BE', ...BODY }}
             >

@@ -2,8 +2,9 @@
  * Setup Page — "Living Island" Design
  * Multi-step setup wizard: Expansions → Config → Checklist → Start
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { useGame } from '@/contexts/GameContext';
 import {
   EXPANSIONS, SPIRITS, ADVERSARIES, SCENARIOS, BLIGHT_CARDS, BOARDS,
@@ -27,6 +28,7 @@ const FOREST_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or
 
 export default function Setup() {
   const { state, dispatch, updateSession, updatePlayer } = useGame();
+  const [, setLocation] = useLocation();
   const session = state.currentSession;
   const [activeStep, setActiveStep] = useState(0);
   const [detailSpirit, setDetailSpirit] = useState<SpiritDetail | null>(null);
@@ -34,6 +36,10 @@ export default function Setup() {
   const [difficultyTarget, setDifficultyTarget] = useState<DifficultyTarget>('any');
   const [balanceMode, setBalanceMode] = useState<BalanceMode>('balanced');
   const [randomizeAnimation, setRandomizeAnimation] = useState(false);
+
+  useEffect(() => {
+    if (!session) setLocation('/', { replace: true });
+  }, [session, setLocation]);
 
   const handleRandomizeAll = () => {
     if (!session) return;
@@ -103,7 +109,7 @@ export default function Setup() {
         <div className="container py-4">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => dispatch({ type: 'CLEAR_SESSION' })}
+              onClick={() => { dispatch({ type: 'CLEAR_SESSION' }); setLocation('/'); }}
               className="text-sm transition-colors flex items-center gap-1"
               style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}
             >
@@ -216,7 +222,7 @@ export default function Setup() {
             </Button>
           ) : (
             <Button
-              onClick={() => dispatch({ type: 'COMPLETE_SETUP' })}
+              onClick={() => { dispatch({ type: 'COMPLETE_SETUP' }); setLocation('/session'); }}
               className="gap-2 font-semibold"
               style={{ backgroundColor: '#D4A843', color: '#0B1D0E' }}
             >
@@ -729,7 +735,7 @@ function PlayersStep({ session, updateSession, updatePlayer, onViewSpirit, onRan
 
 /* ===== STEP 3: GAME OPTIONS ===== */
 function OptionsStep({ session, updateSession, onRandomizeOptions, difficultyTarget, setDifficultyTarget }: any) {
-  const { dispatch } = useGame();
+  const [, setLocation] = useLocation();
   const activeExpansions = ['base', ...session.expansions];
 
   const availableAdversaries = ADVERSARIES.filter(a => activeExpansions.includes(a.expansion));
@@ -856,7 +862,7 @@ function OptionsStep({ session, updateSession, onRandomizeOptions, difficultyTar
               ))}
             </div>
             <button
-              onClick={() => dispatch({ type: 'SET_VIEW', view: 'adversaries' })}
+              onClick={() => setLocation('/adversaries')}
               className="mt-2 flex items-center gap-1 text-xs transition-colors"
               style={{ color: '#E06C5A', fontFamily: "'Source Serif 4', serif" }}
             >
@@ -900,7 +906,7 @@ function OptionsStep({ session, updateSession, onRandomizeOptions, difficultyTar
           ))}
         </div>
         <button
-          onClick={() => dispatch({ type: 'SET_VIEW', view: 'scenarios' })}
+          onClick={() => setLocation('/scenarios')}
           className="flex items-center gap-1 mt-3 text-xs transition-colors"
           style={{ color: 'rgba(126,200,160,0.6)', fontFamily: "'Source Serif 4', serif" }}
           onMouseEnter={e => (e.currentTarget.style.color = '#7EC8A0')}

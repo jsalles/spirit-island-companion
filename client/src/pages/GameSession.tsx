@@ -3,8 +3,9 @@
  * Shows current game phase with step-by-step instructions
  * Turn tracker, phase navigation, and end game dialog
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { useGame } from '@/contexts/GameContext';
 import { GAME_PHASES, WIN_CONDITIONS, LOSS_CONDITIONS } from '@/lib/gameData';
 import {
@@ -33,12 +34,17 @@ const PHASE_COLORS: Record<string, string> = {
 
 export default function GameSession() {
   const { state, dispatch } = useGame();
+  const [, setLocation] = useLocation();
   const session = state.currentSession;
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [endResult, setEndResult] = useState<'win' | 'loss' | null>(null);
   const [selectedCondition, setSelectedCondition] = useState('');
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    if (!session) setLocation('/', { replace: true });
+  }, [session, setLocation]);
 
   if (!session) return null;
 
@@ -71,6 +77,7 @@ export default function GameSession() {
       winCondition: endResult === 'win' ? selectedCondition : undefined,
       lossReason: endResult === 'loss' ? selectedCondition : undefined,
     });
+    setLocation('/');
   };
 
   // Filter steps based on expansion
@@ -94,7 +101,7 @@ export default function GameSession() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => dispatch({ type: 'CLEAR_SESSION' })}
+                onClick={() => { dispatch({ type: 'CLEAR_SESSION' }); setLocation('/'); }}
                 className="flex items-center gap-1 text-xs transition-colors"
                 style={{ color: 'rgba(255,255,255,0.4)' }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.8)')}

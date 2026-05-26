@@ -3,15 +3,13 @@
  * Split-screen design: Spirit Island (mystical/nature) vs Final Girl (horror/dark)
  */
 import { motion } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { Leaf, Skull, ChevronRight } from 'lucide-react';
 
 const LANDING_HERO = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/landing-page-hero-XkK3VTcHqM2uqNB52F44UA.webp';
 
-interface LandingPageProps {
-  onSelectGame: (game: 'spirit-island' | 'final-girl') => void;
-}
-
-export default function LandingPage({ onSelectGame }: LandingPageProps) {
+export default function LandingPage() {
+  const [, setLocation] = useLocation();
   return (
     <div className="min-h-screen relative overflow-hidden bg-black">
       {/* Background Image */}
@@ -54,7 +52,7 @@ export default function LandingPage({ onSelectGame }: LandingPageProps) {
           transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
           whileHover={{ scale: 1.03, y: -8 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => onSelectGame('spirit-island')}
+          onClick={() => setLocation('/spirit-island')}
           className="group relative w-full md:w-[420px] h-[320px] md:h-[400px] rounded-3xl overflow-hidden border-2 transition-all duration-500"
           style={{ borderColor: 'rgba(91, 192, 190, 0.3)' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(91, 192, 190, 0.8)'; }}
@@ -145,7 +143,7 @@ export default function LandingPage({ onSelectGame }: LandingPageProps) {
           transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
           whileHover={{ scale: 1.03, y: -8 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => onSelectGame('final-girl')}
+          onClick={() => setLocation('/final-girl')}
           className="group relative w-full md:w-[420px] h-[320px] md:h-[400px] rounded-3xl overflow-hidden border-2 transition-all duration-500"
           style={{ borderColor: 'rgba(220, 38, 38, 0.3)' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(220, 38, 38, 0.8)'; }}

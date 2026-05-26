@@ -2,10 +2,7 @@ import { createContext, useContext, useReducer, useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import type { FGSessionData } from '@/lib/finalGirlData';
 
-type FGView = 'home' | 'setup' | 'session' | 'history' | 'rules' | 'films';
-
 interface FGState {
-  view: FGView;
   currentSession: FGSessionData | null;
   sessionHistory: FGSessionData[];
   setupStep: number;
@@ -16,7 +13,6 @@ interface FGState {
 }
 
 type FGAction =
-  | { type: 'SET_VIEW'; view: FGView }
   | { type: 'START_NEW_SESSION'; session: Partial<FGSessionData> }
   | { type: 'UPDATE_SESSION'; updates: Partial<FGSessionData> }
   | { type: 'SET_SETUP_STEP'; step: number }
@@ -60,7 +56,6 @@ function saveOwnedFilms(films: string[]) {
 }
 
 const initialState: FGState = {
-  view: 'home',
   currentSession: null,
   sessionHistory: loadHistory(),
   setupStep: 0,
@@ -72,9 +67,6 @@ const initialState: FGState = {
 
 function fgReducer(state: FGState, action: FGAction): FGState {
   switch (action.type) {
-    case 'SET_VIEW':
-      return { ...state, view: action.view };
-
     case 'START_NEW_SESSION': {
       const session: FGSessionData = {
         id: nanoid(),
@@ -96,7 +88,6 @@ function fgReducer(state: FGState, action: FGAction): FGState {
       return {
         ...state,
         currentSession: session,
-        view: 'setup',
         setupStep: 0,
         setupChecklist: {},
         currentPhaseIndex: 0,
@@ -122,7 +113,7 @@ function fgReducer(state: FGState, action: FGAction): FGState {
       };
 
     case 'COMPLETE_SETUP':
-      return { ...state, view: 'session', currentPhaseIndex: 0, currentTurn: 1 };
+      return { ...state, currentPhaseIndex: 0, currentTurn: 1 };
 
     case 'SET_PHASE':
       return { ...state, currentPhaseIndex: action.index };
@@ -144,7 +135,6 @@ function fgReducer(state: FGState, action: FGAction): FGState {
         ...state,
         currentSession: ended,
         sessionHistory: history,
-        view: 'home',
       };
     }
 
@@ -155,7 +145,6 @@ function fgReducer(state: FGState, action: FGAction): FGState {
       return {
         ...state,
         currentSession: null,
-        view: 'home',
         setupStep: 0,
         setupChecklist: {},
         currentPhaseIndex: 0,

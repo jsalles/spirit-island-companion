@@ -4,7 +4,7 @@
  */
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGame } from '@/contexts/GameContext';
+import { useLocation } from 'wouter';
 import { ELEMENT_COLORS, COMPLEXITY_COLORS, EXPANSIONS, type Complexity } from '@/lib/gameData';
 import { SPIRIT_DETAILS, ELEMENT_ICONS, getSpiritDetail, type SpiritDetail, type Element } from '@/lib/spiritDetails';
 import SpiritDetailSheet from '@/components/SpiritDetailSheet';
@@ -16,7 +16,7 @@ const ALL_ELEMENTS: Element[] = ['Sun', 'Moon', 'Fire', 'Air', 'Water', 'Earth',
 const ALL_COMPLEXITIES: Complexity[] = ['Low', 'Moderate', 'High', 'Very High'];
 
 export default function Spirits() {
-  const { dispatch } = useGame();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedExpansion, setSelectedExpansion] = useState<string | null>(null);
   const [selectedComplexity, setSelectedComplexity] = useState<Complexity | null>(null);
@@ -75,7 +75,7 @@ export default function Spirits() {
         </div>
         <div className="relative z-10 container pt-8 pb-12">
           <button
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'home' })}
+            onClick={() => setLocation('/')}
             className="text-sm transition-colors flex items-center gap-1 mb-6"
             style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}
           >

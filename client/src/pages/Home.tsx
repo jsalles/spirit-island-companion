@@ -4,6 +4,7 @@
  * Hero section with mystical island imagery
  */
 import { motion } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { useGame } from '@/contexts/GameContext';
 import { Play, BookOpen, History, Leaf, Sparkles, Users, Shield, Scroll, ArrowLeft } from 'lucide-react';
 
@@ -11,33 +12,29 @@ const HERO_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2X
 const SPIRIT_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/spirit-gathering-M2SyPMG5HHNeG2rdLexJRT.webp';
 const FOREST_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/forest-mist-Ar4wXohNL7EqThhHghgPB2.webp';
 
-interface HomeProps {
-  onBack?: () => void;
-}
+export default function Home() {
+  const { startNewSession, state } = useGame();
+  const [, setLocation] = useLocation();
 
-export default function Home({ onBack }: HomeProps) {
-  const { startNewSession, dispatch, state } = useGame();
-
-  const openRulesReference = () => {
-    dispatch({ type: 'SET_VIEW', view: 'rules' });
+  const handleStartNewSession = () => {
+    startNewSession();
+    setLocation('/setup');
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#0b1d0e' }}>
       {/* Back Button */}
-      {onBack && (
-        <motion.button
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          onClick={onBack}
-          className="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10"
-          style={{ color: 'rgba(255,255,255,0.7)' }}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back</span>
-        </motion.button>
-      )}
+      <motion.button
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
+        onClick={() => setLocation('~/landing')}
+        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10"
+        style={{ color: 'rgba(255,255,255,0.7)' }}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span>Back</span>
+      </motion.button>
 
       {/* Hero Section */}
       <section className="relative h-[85vh] flex items-end">
@@ -88,7 +85,7 @@ export default function Home({ onBack }: HomeProps) {
             title="New Game Session"
             description="Select expansions, choose spirits, and walk through the complete setup checklist."
             accentColor="#D4A843"
-            onClick={startNewSession}
+            onClick={handleStartNewSession}
             delay={0.2}
           />
           <ActionCard
@@ -96,7 +93,7 @@ export default function Home({ onBack }: HomeProps) {
             title="Rules Reference"
             description="Quick access to game phases, rules for each step, and expansion-specific changes."
             accentColor="#5BC0BE"
-            onClick={openRulesReference}
+            onClick={() => setLocation('/rules')}
             delay={0.35}
           />
           <ActionCard
@@ -104,7 +101,7 @@ export default function Home({ onBack }: HomeProps) {
             title="Spirit Gallery"
             description="Browse all 37 spirits with detailed profiles, innate powers, and growth options."
             accentColor="#9B8EC4"
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'spirits' })}
+            onClick={() => setLocation('/spirits')}
             delay={0.5}
           />
           <ActionCard
@@ -112,7 +109,7 @@ export default function Home({ onBack }: HomeProps) {
             title="Adversaries"
             description="Detailed profiles for all 8 colonial powers with level-by-level rules."
             accentColor="#E06C5A"
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'adversaries' })}
+            onClick={() => setLocation('/adversaries')}
             delay={0.65}
           />
           <ActionCard
@@ -120,7 +117,7 @@ export default function Home({ onBack }: HomeProps) {
             title="Scenarios"
             description="Detailed profiles for all 15 scenarios with rule changes and setup modifications."
             accentColor="#7EC8A0"
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'scenarios' })}
+            onClick={() => setLocation('/scenarios')}
             delay={0.8}
           />
           <ActionCard
@@ -128,7 +125,7 @@ export default function Home({ onBack }: HomeProps) {
             title="Session History"
             description="Review past games, win/loss records, and session statistics."
             accentColor="#C5A55A"
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'history' })}
+            onClick={() => setLocation('/history')}
             delay={0.95}
           />
         </div>

@@ -5,7 +5,7 @@
  */
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGame } from '@/contexts/GameContext';
+import { useLocation } from 'wouter';
 import {
   ChevronLeft, Search, X, ChevronDown, ChevronRight,
   Layout, Sparkles, Zap, Swords, Clock, Ghost, Flame,
@@ -46,7 +46,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 const FOREST_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/forest-mist-Ar4wXohNL7EqThhHghgPB2.webp';
 
 export default function RulesReference() {
-  const { dispatch } = useGame();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
@@ -124,7 +124,7 @@ export default function RulesReference() {
           <motion.button
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'home' })}
+            onClick={() => setLocation('/')}
             className="flex items-center gap-2 mb-8 text-sm transition-colors"
             style={{ color: 'rgba(255,255,255,0.6)' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#5BC0BE')}
@@ -138,7 +138,7 @@ export default function RulesReference() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.15 }}
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'spirits' })}
+            onClick={() => setLocation('/spirits')}
             className="flex items-center gap-1 text-sm transition-colors ml-4"
             style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}
             onMouseEnter={e => (e.currentTarget.style.color = '#9B8EC4')}
@@ -151,7 +151,7 @@ export default function RulesReference() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'adversaries' })}
+            onClick={() => setLocation('/adversaries')}
             className="flex items-center gap-1 text-sm transition-colors ml-4"
             style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}
             onMouseEnter={e => (e.currentTarget.style.color = '#E06C5A')}
@@ -163,7 +163,7 @@ export default function RulesReference() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.3 }}
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'scenarios' })}
+            onClick={() => setLocation('/scenarios')}
             className="flex items-center gap-1 text-sm transition-colors ml-4"
             style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Source Serif 4', serif" }}
             onMouseEnter={e => (e.currentTarget.style.color = '#7EC8A0')}

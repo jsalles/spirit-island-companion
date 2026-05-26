@@ -4,6 +4,7 @@
  * VHS horror aesthetic with modern polish
  */
 import { motion } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { useFinalGirl } from '@/contexts/FinalGirlContext';
 import { Play, BookOpen, History, Film, Skull, ArrowLeft } from 'lucide-react';
 
@@ -11,12 +12,14 @@ const HERO_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2X
 const KILLER_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/fg-killer-collage-C5eXbX5YoxcQwqR45mPdPK.webp';
 const SETUP_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663316422635/7or2XBJKrDChpLdNiLsCVc/fg-setup-bg-NSeVrhhAGf3cF4Jt6WZ7iR.webp';
 
-interface FGHomeProps {
-  onBack: () => void;
-}
+export default function FGHome() {
+  const { startNewSession, state } = useFinalGirl();
+  const [, setLocation] = useLocation();
 
-export default function FGHome({ onBack }: FGHomeProps) {
-  const { startNewSession, dispatch, state } = useFinalGirl();
+  const handleStartNewSession = () => {
+    startNewSession();
+    setLocation('/setup');
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#0a0505' }}>
@@ -25,7 +28,7 @@ export default function FGHome({ onBack }: FGHomeProps) {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
-        onClick={onBack}
+        onClick={() => setLocation('~/landing')}
         className="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10"
         style={{ color: 'rgba(255,255,255,0.7)' }}
       >
@@ -82,7 +85,7 @@ export default function FGHome({ onBack }: FGHomeProps) {
             title="New Game Session"
             description="Select your Feature Films, randomize the Killer and Location, and get a full setup checklist."
             accentColor="#dc2626"
-            onClick={startNewSession}
+            onClick={handleStartNewSession}
             delay={0.2}
           />
           <ActionCard
@@ -90,7 +93,7 @@ export default function FGHome({ onBack }: FGHomeProps) {
             title="Rules Reference"
             description="Quick access to turn phases, Horror Rolls, Bloodlust, and all game mechanics."
             accentColor="#f97316"
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'rules' })}
+            onClick={() => setLocation('/rules')}
             delay={0.35}
           />
           <ActionCard
@@ -98,7 +101,7 @@ export default function FGHome({ onBack }: FGHomeProps) {
             title="Feature Films"
             description="Browse all 20 Feature Films with Killers, Locations, and Final Girls from every series."
             accentColor="#a855f7"
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'films' })}
+            onClick={() => setLocation('/films')}
             delay={0.5}
           />
           <ActionCard
@@ -106,7 +109,7 @@ export default function FGHome({ onBack }: FGHomeProps) {
             title="Session History"
             description="Review past games, survival records, and export your history."
             accentColor="#eab308"
-            onClick={() => dispatch({ type: 'SET_VIEW', view: 'history' })}
+            onClick={() => setLocation('/history')}
             delay={0.65}
           />
         </div>
